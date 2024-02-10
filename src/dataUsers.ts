@@ -7,7 +7,7 @@ export class DataUsers {
     this.database = [];
   }
 
-  public add(user: User): User | null {
+  public post(user: User): User | null {
     if (this.database.some((item: User) => item.id === user.id)) {
       return null;
     }
@@ -23,8 +23,8 @@ export class DataUsers {
     return this.database.find((user: User) => user.id === id) ?? null;
   }
 
-  public update(id: string, updatedUser: User): User | null {
-    const userToUpdate = this.database.find((item: User) => item.id === id);
+  public put(updatedUser: User): User | null {
+    const userToUpdate = this.database.find((item: User) => item.id === updatedUser.id);
     if (!userToUpdate) return null;
     Object.assign(userToUpdate, updatedUser);
     return userToUpdate;

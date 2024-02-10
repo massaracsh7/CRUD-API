@@ -10,7 +10,7 @@ export const enum STATUS {
 export const enum ERROR_MSG {
   SERVER_ERROR = 'Error on server',
   NOT_FOUND = 'User is not found',
-  INVALID_BODY = 'Invalid body',
+  INVALID_DATA = 'Invalid data',
   INVALID_ID = 'Invalid id',
   INVALID_URL = 'Invalid url',
   NOT_FOUND_URL = 'Url is not found'
