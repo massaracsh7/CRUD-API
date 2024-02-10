@@ -1,18 +1,23 @@
+import 'dotenv/config';
 import cluster from 'cluster';
 import http from 'http';
 import os from 'os';
 import { router } from './router';
 
-if (cluster.isPrimary) {
-  const numCPUs = os.cpus().length;
-  const PORT = process.env.PORT || '4000';
+// Parse command-line arguments
+const args = parseArgs(process.argv.slice(2));
+const PORT = process.env.PORT; // Set default port if PORT environment variable is not provided
+const server = http.createServer(router);
 
-  for (let i = 0; i < numCPUs - 1; i++) {
+if (args['cluster'] && cluster.isPrimary) {
+  const numCPUs = os.cpus().length;
+
+  for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
 
   cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker ${worker?.process.pid} died`);
+    console.log(`Worker ${worker.process.pid} died`);
     cluster.fork();
   });
 
@@ -20,9 +25,11 @@ if (cluster.isPrimary) {
     if (req.url && req.url.startsWith('/api/')) {
       const workers = cluster.workers;
       if (workers) {
-        const worker = Object.values(workers)[0]; // Round-robin routing
-        if (worker) {
-          worker.send({ type: 'request', req, res });
+        const workerIds = Object.keys(workers);
+        const selectedWorkerId = workerIds[Math.floor(Math.random() * workerIds.length)]; // Random selection
+        const selectedWorker = workers[selectedWorkerId];
+        if (selectedWorker) {
+          selectedWorker.send({ type: 'request', req, res });
           return;
         }
       }
@@ -35,8 +42,17 @@ if (cluster.isPrimary) {
     console.log(`Load balancer is running on http://localhost:${PORT}`);
   });
 } else {
-  const PORT = process.env.PORT || '4000';
-  http.createServer(router).listen(PORT, () => {
-    console.log(`Worker ${process.pid} is running on http://localhost:${PORT}`);
+  server.listen(PORT, () => {
+    console.log(`Server ${process.pid} is running on http://localhost:${PORT}`);
   });
+}
+
+// Function to parse command-line arguments
+function parseArgs(args) {
+  const parsedArgs = {};
+  args.forEach(arg => {
+    const [key, value] = arg.split('=');
+    parsedArgs[key.replace(/^--?/, '')] = value || true; // Set value to true if no value provided
+  });
+  return parsedArgs;
 }

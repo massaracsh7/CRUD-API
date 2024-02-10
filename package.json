@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start:prod": "webpack --mode=production",
-    "start:dev": "webpack --mode=development --watch",
-    "lint": "eslint . --ext .ts",
+    "start:prod": "webpack --mode=production && node ./dist/index.js",
+    "start:dev": "nodemon ./src/index.ts",
+    "start:multi": "node ./src/index.ts --cluster=enable",
     "test": "jest"
   },
   "repository": {
