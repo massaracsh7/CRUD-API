@@ -32,6 +32,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
     alias: {
       'http': require.resolve('http'),
+      'uuid': 'uuid/dist/esm-browser',
     },
   },
   plugins: [

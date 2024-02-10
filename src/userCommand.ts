@@ -1,6 +1,4 @@
 import { User } from "./types";
-import { validate } from 'uuid';
-
 import { database } from './dataUsers';
 import { ERROR_MSG, } from './constants';
 
@@ -24,9 +22,7 @@ class UserCommand {
     if (!id) {
       return database.getUsers();
     } else {
-      if (!validate(id)) {
-        throw new Error(ERROR_MSG.INVALID_ID);
-      } else if (!isIdExist(id)) {
+       if (!isIdExist(id)) {
         throw new Error(ERROR_MSG.NOT_FOUND);
       } else {
         return database.getUser(id);
@@ -45,8 +41,6 @@ class UserCommand {
   async put(user: User) {
     if (!user.id) {
       throw new Error(ERROR_MSG.INVALID_URL);
-    } else if (!validate(user.id)) {
-      throw new Error(ERROR_MSG.INVALID_ID);
     } else if (!isIdExist(user.id)) {
       throw new Error(ERROR_MSG.NOT_FOUND);
     } else if (!isPostValid(user)) {
@@ -59,8 +53,6 @@ class UserCommand {
   async delete(id: string) {
     if (!id) {
       throw new Error(ERROR_MSG.INVALID_URL);
-    } else if (!validate(id)) {
-      throw new Error(ERROR_MSG.INVALID_ID);
     } else if (!isIdExist(id)) {
       throw new Error(ERROR_MSG.NOT_FOUND);
     } else {
