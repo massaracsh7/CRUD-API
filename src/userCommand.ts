@@ -8,11 +8,12 @@ const isIdExist = async (id: string) => {
 };
 
 const isPostValid = (data: User) => {
-  const { hobbies, username, age } = data;
-  return Object.keys(data).length === 3
-    && username && age && hobbies
+  const { hobbies, username, age, id } = data;
+  return Object.keys(data).length === 4
+    && username && age && hobbies && id
     && typeof username === 'string'
     && typeof age === 'number'
+    && typeof id === 'string'
     && Array.isArray(hobbies)
     && hobbies.every(hobby => typeof hobby === 'string');
 };
@@ -38,15 +39,13 @@ class UserCommand {
     }
   }
 
-  async put(user: User) {
-    if (!user.id) {
+  async put(id: string, user: User) {
+    if (!id) {
       throw new Error(ERROR_MSG.INVALID_URL);
-    } else if (!isIdExist(user.id)) {
+    } else if (!isIdExist(id)) {
       throw new Error(ERROR_MSG.NOT_FOUND);
-    } else if (!isPostValid(user)) {
-      throw new Error(ERROR_MSG.INVALID_DATA);
     } else {
-      return await database.put(user);
+      return await database.put(id, user);
     }
   }
 

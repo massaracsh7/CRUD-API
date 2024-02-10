@@ -23,8 +23,8 @@ export class DataUsers {
     return this.database.find((user: User) => user.id === id) ?? null;
   }
 
-  public put(updatedUser: User): User | null {
-    const userToUpdate = this.database.find((item: User) => item.id === updatedUser.id);
+  public put(id: string, updatedUser: User): User | null {
+    const userToUpdate = this.database.find((item: User) => item.id === id);
     if (!userToUpdate) return null;
     Object.assign(userToUpdate, updatedUser);
     return userToUpdate;

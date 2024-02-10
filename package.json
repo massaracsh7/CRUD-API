@@ -5,7 +5,7 @@
   "scripts": {
     "start:prod": "webpack --mode=production && node ./dist/index.js",
     "start:dev": "nodemon ./src/index.ts",
-    "start:multi": "node ./src/index.ts --cluster=enable",
+    "start:multi": "webpack --mode=production && node ./dist/index.js --cluster=enable",
     "test": "jest"
   },
   "repository": {
