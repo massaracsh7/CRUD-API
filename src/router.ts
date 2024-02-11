@@ -1,4 +1,3 @@
-// router.ts
 import { ERROR_MSG, STATUS, MethodHandlers, Method } from './constants';
 import { IncomingMessage, ServerResponse } from 'http';
 import { userCommand } from './userCommand';
@@ -10,7 +9,6 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
       throw new Error(ERROR_MSG.INVALID_URL);
     }
     const id = extractIdFromUrlPath(url) || '';
-
     const handleGetRequest = async () => {
       const getUser = await userCommand.get(id);
       res.writeHead(STATUS.SUCCESS);
@@ -50,12 +48,26 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
       req.on('data', chunk => {
         putData += chunk;
       }).on('end', async () => {
-        const updatedUser = JSON.parse(putData);
-        await userCommand.put(id, updatedUser);
-        res.writeHead(STATUS.SUCCESS);
-        res.end();
+        if (!putData) {
+          res.writeHead(STATUS.INVALID);
+          res.write(ERROR_MSG.INVALID_DATA);
+          res.end();
+          return;
+        }
+
+        try {
+          const updatedUser = JSON.parse(putData);
+          await userCommand.put(id, updatedUser);
+          res.writeHead(STATUS.SUCCESS);
+          res.end();
+        } catch (error) {
+          res.writeHead(STATUS.INVALID);
+          res.write(ERROR_MSG.INVALID_DATA);
+          res.end();
+        }
       });
     };
+
 
     const handleDeleteRequest = async () => {
       await userCommand.delete(id);
