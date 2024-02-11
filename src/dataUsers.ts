@@ -8,34 +8,40 @@ export class DataUsers {
   }
 
   public post(user: User): User | null {
-    if (this.database.some((item: User) => item.id === user.id)) {
-      return null;
+    const existingUser = this.getUser(user.id);
+    if (existingUser) {
+      return null; // User already exists
     }
     this.database.push(user);
     return user;
   }
 
   public getUsers(): db {
-    return this.database;
+    return [...this.database]; // Return a shallow copy to prevent direct modification
   }
 
   public getUser(id: string): User | null {
-    return this.database.find((user: User) => user.id === id) ?? null;
+    return this.database.find(user => user.id === id) || null;
   }
 
   public put(id: string, updatedUser: User): User | null {
-    const userToUpdate = this.database.find((item: User) => item.id === id);
-    if (!userToUpdate) return null;
-    Object.assign(userToUpdate, updatedUser);
-    return userToUpdate;
+    const index = this.database.findIndex(user => user.id === id);
+    if (index === -1) {
+      return null; // User not found
+    }
+    this.database[index] = { ...this.database[index], ...updatedUser }; // Update user
+    return this.database[index];
   }
 
-  public delete(id: string | number): User | null {
-    const userToDelete = this.database.find((user: User) => user.id === id);
-    if (!userToDelete) return null;
-    this.database = this.database.filter((user: User) => user.id !== id);
-    return userToDelete;
+  public delete(id: string): User | null {
+    const index = this.database.findIndex(user => user.id === id);
+    if (index === -1) {
+      return null; // User not found
+    }
+    const deletedUser = this.database.splice(index, 1)[0]; // Remove user
+    return deletedUser;
   }
 }
 
 export const database = new DataUsers();
+  

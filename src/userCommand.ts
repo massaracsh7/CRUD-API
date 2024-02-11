@@ -1,62 +1,48 @@
 import { User } from "./types";
 import { database } from './dataUsers';
-import { ERROR_MSG, } from './constants';
+import { ERROR_MSG } from './constants';
 
-const isIdExist = async (id: string) => {
-  const users = await database.getUsers();
-  return !!users.find(user => user.id === id);
-};
-
-const isPostValid = (data: User) => {
-  const { hobbies, username, age, id } = data;
-  return Object.keys(data).length === 4
-    && username && age && hobbies && id
-    && typeof username === 'string'
-    && typeof age === 'number'
-    && typeof id === 'string'
-    && Array.isArray(hobbies)
-    && hobbies.every(hobby => typeof hobby === 'string');
-};
-
-class UserCommand {
+export class UserCommand {
   async get(id?: string) {
     if (!id) {
       return database.getUsers();
     } else {
-       if (!isIdExist(id)) {
-        throw new Error(ERROR_MSG.NOT_FOUND);
-      } else {
-        return database.getUser(id);
-      }
+        const user = await database.getUser(id);
+        if (!user) {
+          throw new Error(ERROR_MSG.NOT_FOUND);
+        }
+        return user;
     }
   }
 
   async post(newUser: User) {
-    if (!isPostValid(newUser)) {
-      throw new Error(ERROR_MSG.INVALID_DATA);
-    } else {
-      return await database.post(newUser);
-    }
+    validateUser(newUser);
+    return database.post(newUser);
   }
 
-  async put(id: string, user: User) {
-    if (!id) {
-      throw new Error(ERROR_MSG.INVALID_URL);
-    } else if (!isIdExist(id)) {
-      throw new Error(ERROR_MSG.NOT_FOUND);
-    } else {
-      return await database.put(id, user);
-    }
+  async put(id: string, updatedUser: User) {
+    validateUser(updatedUser);
+      const user = await database.getUser(id);
+      if (!user) {
+        throw new Error(ERROR_MSG.NOT_FOUND);
+      }
+    return database.put(id, updatedUser);
   }
 
   async delete(id: string) {
-    if (!id) {
-      throw new Error(ERROR_MSG.INVALID_URL);
-    } else if (!isIdExist(id)) {
+    const user = await database.getUser(id);
+    if (!user) {
       throw new Error(ERROR_MSG.NOT_FOUND);
-    } else {
-      await database.delete(id);
-    } 
+    }
+    return database.delete(id);
   }
 }
+
+function validateUser(user: User) {
+  const { username, age, hobbies } = user;
+  if (!(username && typeof username === 'string' && age && typeof age === 'number' && Array.isArray(hobbies))) {
+    throw new Error(ERROR_MSG.INVALID_DATA);
+  }
+}
+
 export const userCommand = new UserCommand();

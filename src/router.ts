@@ -1,40 +1,12 @@
-import { API_BASE_URL, ERROR_MSG, STATUS, MethodHandlers, Method } from './constants';
+// router.ts
+import { ERROR_MSG, STATUS, MethodHandlers, Method } from './constants';
 import { IncomingMessage, ServerResponse } from 'http';
 import { userCommand } from './userCommand';
-import crypto from 'crypto';
 
-type CustomRequest = IncomingMessage;
-type CustomResponse = ServerResponse;
-
-const extractIdFromUrlPath = (url: string) => {
-  const urlSplits = url.split('/');
-  if (urlSplits.length === 3 && urlSplits[2] === '') {
-    return null;
-  }
-  return urlSplits[3] || null;
-};
-
-const isUrlPathValid = (url: string) => {
-  const urlSplits = url.split('/');
-  const endpointSplits = API_BASE_URL.split('/');
-  console.log(url);
-  if (!url.startsWith(API_BASE_URL)) {
-    return false;
-  }
-  for (let i = 0; i < endpointSplits.length - 1; i++) {
-    if (endpointSplits[i] !== urlSplits[i]) {
-      return false;
-    }
-  }
-  return true;
-};
-
-
-export const router = async (req: CustomRequest, res: CustomResponse) => {
+export const router = async (req: IncomingMessage, res: ServerResponse) => {
   try {
     const { url, method } = req;
     if (!url) {
-      console.log('no url');
       throw new Error(ERROR_MSG.INVALID_URL);
     }
     const id = extractIdFromUrlPath(url) || '';
@@ -47,34 +19,40 @@ export const router = async (req: CustomRequest, res: CustomResponse) => {
     };
 
     const handlePostRequest = async () => {
-      const postUser: string[] = [];
+      let postData = '';
       req.on('data', chunk => {
-        postUser.push(chunk);
+        postData += chunk;
       }).on('end', async () => {
-        const dataUser = JSON.parse(postUser.toString());
-        const uuid = crypto.randomUUID({ disableEntropyCache: true })
-        const newUser = {
-          ...dataUser,
-          id: uuid
+        if (!postData) {
+          res.writeHead(STATUS.INVALID);
+          res.write(ERROR_MSG.INVALID_DATA);
+          res.end();
+          return;
         }
-        const resData = await userCommand.post(newUser);
-        res.setHeader('Content-Type', 'application/json');
-        res.writeHead(STATUS.CREATED);
-        res.write(JSON.stringify(resData));
-        res.end();
+
+        try {
+          const newUser = JSON.parse(postData);
+          const resData = await userCommand.post(newUser);
+          res.writeHead(STATUS.CREATED);
+          res.write(JSON.stringify(resData));
+          res.end();
+        } catch (error) {
+          res.writeHead(STATUS.INVALID);
+          res.write(ERROR_MSG.INVALID_DATA);
+          res.end();
+        }
       });
     };
 
+
     const handlePutRequest = async () => {
-      const putUser: string[] = [];
+      let putData = '';
       req.on('data', chunk => {
-        putUser.push(chunk);
+        putData += chunk;
       }).on('end', async () => {
-        const dataUser = JSON.parse(putUser.toString());
-        const resData = await userCommand.put(id, dataUser);
-        res.setHeader('Content-Type', 'application/json');
+        const updatedUser = JSON.parse(putData);
+        await userCommand.put(id, updatedUser);
         res.writeHead(STATUS.SUCCESS);
-        res.write(JSON.stringify(resData));
         res.end();
       });
     };
@@ -84,6 +62,7 @@ export const router = async (req: CustomRequest, res: CustomResponse) => {
       res.writeHead(STATUS.DELETED);
       res.end();
     };
+
     const methodHandlers: MethodHandlers = {
       GET: handleGetRequest,
       POST: handlePostRequest,
@@ -96,21 +75,27 @@ export const router = async (req: CustomRequest, res: CustomResponse) => {
     }
     await handler();
   } catch (err) {
-    if (err instanceof Error) {
-      let statusCode = STATUS.ERROR;
+    let statusCode = STATUS.ERROR;
+    let errorMessage = ERROR_MSG.SERVER_ERROR;
+    if (err instanceof Error) { 
       if (err.message === ERROR_MSG.INVALID_URL) {
         statusCode = STATUS.INVALID;
-      } else if (err.message === ERROR_MSG.NOT_FOUND_URL) {
+      } else if (err.message === ERROR_MSG.NOT_FOUND || err.message === ERROR_MSG.NOT_FOUND_URL) {
         statusCode = STATUS.NOT_FOUND;
+        errorMessage = ERROR_MSG.NOT_FOUND;
+      } else if (err.message === ERROR_MSG.INVALID_DATA || err.message === ERROR_MSG.INVALID_ID) {
+        statusCode = STATUS.INVALID;
+        errorMessage = err.message;
       }
-      res.writeHead(statusCode);
-      res.write(err.message);
-      res.end();
-    } else {
-      console.error('Unknown error:', err);
-      res.writeHead(STATUS.ERROR);
-      res.write('An unknown error occurred');
-      res.end();
     }
+    res.writeHead(statusCode);
+    res.write(errorMessage);
+    res.end();
   }
+};
+
+const extractIdFromUrlPath = (url: string) => {
+  const urlParts = url.split('/');
+  const idIndex = urlParts.indexOf('users') + 1;
+  return urlParts[idIndex];
 };

@@ -1,58 +1,44 @@
-import 'dotenv/config';
-import cluster from 'cluster';
+import cluster, { Worker } from 'cluster';
 import http from 'http';
 import os from 'os';
 import { router } from './router';
 
-// Parse command-line arguments
-const args = parseArgs(process.argv.slice(2));
-const PORT = process.env.PORT; // Set default port if PORT environment variable is not provided
-const server = http.createServer(router);
+const PORT = parseInt(process.env.PORT || '4000', 10) + (cluster.worker?.id || 0);
 
-if (args['cluster'] && cluster.isPrimary) {
-  const numCPUs = os.cpus().length;
+if (shouldUseCluster() && cluster !== undefined) {
+  if (cluster.isPrimary) {
+    const numCPUs = os.cpus().length;
 
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
+    console.log(`Primary process ${process.pid} is running, creating ${numCPUs} workers...`);
 
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker ${worker.process.pid} died`);
-    cluster.fork();
-  });
-
-  const loadBalancer = http.createServer((req, res) => {
-    if (req.url && req.url.startsWith('/api/')) {
-      const workers = cluster.workers;
-      if (workers) {
-        const workerIds = Object.keys(workers);
-        const selectedWorkerId = workerIds[Math.floor(Math.random() * workerIds.length)]; // Random selection
-        const selectedWorker = workers[selectedWorkerId];
-        if (selectedWorker) {
-          selectedWorker.send({ type: 'request', req, res });
-          return;
-        }
-      }
+    for (let i = 0; i < numCPUs; i++) {
+      cluster.fork();
     }
-    res.writeHead(404);
-    res.end('Not found');
-  });
 
-  loadBalancer.listen(PORT, () => {
-    console.log(`Load balancer is running on http://localhost:${PORT}`);
-  });
+    cluster.on('exit', (worker, code, signal) => {
+      console.log(`Worker ${worker.process.pid} died`);
+      console.log(`Forking new worker...`);
+      cluster.fork();
+    });
+
+    const server = http.createServer(router);
+    server.listen(PORT, () => {
+      console.log(`Load balancer running at http://localhost:${PORT}/`);
+    });
+  } else {
+    const server = http.createServer(router);
+    server.listen(PORT, () => {
+      console.log(`Worker ${process.pid} server running at http://localhost:${PORT}/`);
+    });
+  }
 } else {
+  const server = http.createServer(router);
   server.listen(PORT, () => {
-    console.log(`Server ${process.pid} is running on http://localhost:${PORT}`);
+    console.log(`Server is running at http://localhost:${PORT}/`);
   });
 }
 
-// Function to parse command-line arguments
-function parseArgs(args) {
-  const parsedArgs = {};
-  args.forEach(arg => {
-    const [key, value] = arg.split('=');
-    parsedArgs[key.replace(/^--?/, '')] = value || true; // Set value to true if no value provided
-  });
-  return parsedArgs;
+function shouldUseCluster() {
+  const clusterEnabled = process.env.npm_lifecycle_script?.includes('cluster=enable');
+  return clusterEnabled;
 }
