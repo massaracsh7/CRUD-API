@@ -1,6 +1,7 @@
 import { User } from "./types";
 import { database } from './dataUsers';
 import { ERROR_MSG } from './constants';
+import crypto from 'crypto';
 
 export class UserCommand {
   async get(id?: string) {
@@ -15,8 +16,13 @@ export class UserCommand {
     }
   }
 
-  async post(newUser: User) {
-    validateUser(newUser);
+  async post(dataUser: User) {
+    validateUser(dataUser);
+    const uuid = crypto.randomUUID({ disableEntropyCache: true })
+    const newUser = {
+      ...dataUser,
+      id: uuid
+    }
     return database.post(newUser);
   }
 

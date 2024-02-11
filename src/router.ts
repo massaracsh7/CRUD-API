@@ -29,8 +29,8 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
         }
 
         try {
-          const newUser = JSON.parse(postData);
-          const resData = await userCommand.post(newUser);
+          const dataUser = JSON.parse(postData);
+          const resData = await userCommand.post(dataUser);
           res.writeHead(STATUS.CREATED);
           res.write(JSON.stringify(resData));
           res.end();
