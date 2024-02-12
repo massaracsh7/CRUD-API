@@ -13,7 +13,6 @@ export const enum ERROR_MSG {
   INVALID_DATA = 'Invalid data',
   INVALID_ID = 'Invalid id',
   INVALID_URL = 'Invalid url',
-  NOT_FOUND_URL = 'Url is not found'
 }
 
 export const API_BASE_URL = '/api/users';

@@ -10,14 +10,14 @@ export class DataUsers {
   public post(user: User): User | null {
     const existingUser = this.getUser(user.id);
     if (existingUser) {
-      return null; // User already exists
+      return null;
     }
     this.database.push(user);
     return user;
   }
 
   public getUsers(): db {
-    return [...this.database]; // Return a shallow copy to prevent direct modification
+    return [...this.database]; 
   }
 
   public getUser(id: string): User | null {
@@ -27,22 +27,19 @@ export class DataUsers {
   public put(id: string, updatedUser: User): User | null {
     const index = this.database.findIndex(user => user.id === id);
     if (index === -1) {
-      return null; // User not found
+      return null; 
     }
-    this.database[index] = { ...this.database[index], ...updatedUser }; // Update user
+    this.database[index] = { ...this.database[index], ...updatedUser };
     return this.database[index];
   }
 
   public delete(id: string): User | null {
     const index = this.database.findIndex(user => user.id === id);
     if (index === -1) {
-      return null; // User not found
+      return null;
     }
-    const deletedUser = this.database.splice(index, 1)[0]; // Remove user
+    const deletedUser = this.database.splice(index, 1)[0]; 
     return deletedUser;
-  }
-  public clear(): void {
-    this.database = [];
   }
 }
 

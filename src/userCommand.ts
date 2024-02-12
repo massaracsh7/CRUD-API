@@ -8,16 +8,13 @@ export class UserCommand {
     if (!id) {
       return database.getUsers();
     } else {
-      if (!isValidUUID(id)) {
-        throw new Error(ERROR_MSG.INVALID_ID);
-      }
-
+      isValidUUID(id);
+    }
       const user = await database.getUser(id);
       if (!user) {
         throw new Error(ERROR_MSG.NOT_FOUND);
       }
       return user;
-    }
   }
 
   async post(dataUser: User) {
@@ -32,25 +29,19 @@ export class UserCommand {
 
   async put(id: string, updatedUser: User) {
     validateUser(updatedUser);
-      const user = await database.getUser(id);
-      if (!user) {
-        throw new Error(ERROR_MSG.NOT_FOUND);
-      } else {
-        if (!isValidUUID(id)) {
-          throw new Error(ERROR_MSG.INVALID_ID);
-        }
-      }
+    isValidUUID(id);
+    const user = await database.getUser(id);
+    if (!user) {
+      throw new Error(ERROR_MSG.NOT_FOUND);
+    }
     return database.put(id, updatedUser);
   }
 
   async delete(id: string) {
+    isValidUUID(id);
     const user = await database.getUser(id);
     if (!user) {
       throw new Error(ERROR_MSG.NOT_FOUND);
-    } else {
-      if (!isValidUUID(id)) {
-        throw new Error(ERROR_MSG.INVALID_ID);
-      }
     }
     return database.delete(id);
   }
@@ -63,9 +54,12 @@ function validateUser(user: User) {
   }
 }
 
-function isValidUUID(id: string): boolean {
+function isValidUUID(id: string) {
   const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  return uuidRegex.test(id);
+  if (!(uuidRegex.test(id))){
+    throw new Error(ERROR_MSG.INVALID_ID);
+  }
+
 }
 
 export const userCommand = new UserCommand();

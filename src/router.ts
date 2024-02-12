@@ -5,7 +5,7 @@ import { userCommand } from './userCommand';
 export const router = async (req: IncomingMessage, res: ServerResponse) => {
   try {
     const { url, method } = req;
-    if (!url) {
+    if (!url || !url.startsWith('/api/users')) {
       throw new Error(ERROR_MSG.INVALID_URL);
     }
     const id = extractIdFromUrlPath(url) || '';
@@ -21,13 +21,6 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
       req.on('data', chunk => {
         postData += chunk;
       }).on('end', async () => {
-        if (!postData) {
-          res.writeHead(STATUS.INVALID);
-          res.write(ERROR_MSG.INVALID_DATA);
-          res.end();
-          return;
-        }
-
         try {
           const dataUser = JSON.parse(postData);
           const resData = await userCommand.post(dataUser);
@@ -35,16 +28,8 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
           res.write(JSON.stringify(resData));
           res.end();
         } catch (error) {
-          let statusCode = STATUS.INVALID;
-          let errorMessage = ERROR_MSG.INVALID_DATA;
-          if (error instanceof Error) {
-            if (error.message === ERROR_MSG.INVALID_ID) {
-              statusCode = STATUS.INVALID;
-              errorMessage = error.message;
-            }
-          }
-          res.writeHead(statusCode);
-          res.write(errorMessage);
+          res.writeHead(STATUS.INVALID);
+          res.write(ERROR_MSG.INVALID_DATA);
           res.end();
         }
       });
@@ -55,21 +40,15 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
       req.on('data', chunk => {
         putData += chunk;
       }).on('end', async () => {
-        if (!putData) {
-          res.writeHead(STATUS.INVALID);
-          res.write(ERROR_MSG.INVALID_DATA);
-          res.end();
-          return;
-        }
-
         try {
           const updatedUser = JSON.parse(putData);
-          await userCommand.put(id, updatedUser);
+          const resData = await userCommand.put(id, updatedUser);
           res.writeHead(STATUS.SUCCESS);
+          res.write(JSON.stringify(resData));
           res.end();
         } catch (error) {
-          let statusCode = STATUS.INVALID;
-          let errorMessage = ERROR_MSG.INVALID_DATA;
+          let statusCode = STATUS.NOT_FOUND;
+          let errorMessage = ERROR_MSG.NOT_FOUND;
           if (error instanceof Error) {
             if (error.message === ERROR_MSG.INVALID_ID) {
               statusCode = STATUS.INVALID;
@@ -89,8 +68,8 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
         res.writeHead(STATUS.DELETED);
         res.end();
       } catch (error) {
-        let statusCode = STATUS.INVALID;
-        let errorMessage = ERROR_MSG.INVALID_DATA;
+        let statusCode = STATUS.NOT_FOUND;
+        let errorMessage = ERROR_MSG.NOT_FOUND;
         if (error instanceof Error) {
           if (error.message === ERROR_MSG.INVALID_ID) {
             statusCode = STATUS.INVALID;
@@ -111,21 +90,27 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
     };
     const handler = methodHandlers[method as Method];
     if (!handler) {
-      throw new Error(ERROR_MSG.NOT_FOUND_URL);
+      throw new Error(ERROR_MSG.INVALID_URL);
     }
     await handler();
   } catch (err) {
     let statusCode = STATUS.ERROR;
     let errorMessage = ERROR_MSG.SERVER_ERROR;
-    if (err instanceof Error) { 
-      if (err.message === ERROR_MSG.INVALID_URL) {
-        statusCode = STATUS.INVALID;
-      } else if (err.message === ERROR_MSG.NOT_FOUND || err.message === ERROR_MSG.NOT_FOUND_URL) {
-        statusCode = STATUS.NOT_FOUND;
-        errorMessage = ERROR_MSG.NOT_FOUND;
-      } else if (err.message === ERROR_MSG.INVALID_DATA || err.message === ERROR_MSG.INVALID_ID) {
-        statusCode = STATUS.INVALID;
-        errorMessage = err.message;
+    if (err instanceof Error) {
+      switch (err.message) {
+        case ERROR_MSG.INVALID_URL:
+          statusCode = STATUS.NOT_FOUND;
+          errorMessage = ERROR_MSG.INVALID_URL;
+          break;
+        case ERROR_MSG.INVALID_DATA:
+        case ERROR_MSG.INVALID_ID:
+          statusCode = STATUS.INVALID;
+          errorMessage = ERROR_MSG.INVALID_ID;
+          break;
+        case ERROR_MSG.NOT_FOUND:
+          statusCode = STATUS.NOT_FOUND;
+          errorMessage = ERROR_MSG.NOT_FOUND;
+          break;
       }
     }
     res.writeHead(statusCode);
