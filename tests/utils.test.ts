@@ -12,7 +12,7 @@ describe('validateUser should validate User  as objects that have username, age,
     ],
     "id": "b752e626-65fd-4947-bdd2-24fa8b71b5d7"
   }
-  const mockUser2 = {
+  const mockUserIncorrect = {
     "username": "",
     "age": 33,
     "hobbies": [],
@@ -23,7 +23,7 @@ describe('validateUser should validate User  as objects that have username, age,
     expect(response).toBe(true);
   });
   it('should throw error', () => {
-    expect(() => validateUser(mockUser2)).toThrow('Invalid data, please check');
+    expect(() => validateUser(mockUserIncorrect)).toThrow('Invalid data, please check');
   });
 });
 
