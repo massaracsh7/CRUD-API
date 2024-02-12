@@ -9,11 +9,11 @@ export const app = () => {
 
   if (shouldUseCluster() && cluster !== undefined) {
     if (cluster.isPrimary) {
-      const numCPUs = os.cpus().length;
+      const numWork = os.availableParallelism() - 1;
 
-      console.log(`Primary process ${process.pid} is running, creating ${numCPUs} workers...`);
+      console.log(`Primary process ${process.pid} is running, creating workers...`);
 
-      for (let i = 0; i < numCPUs; i++) {
+      for (let i = 0; i < numWork; i++) {
         cluster.fork();
       }
 

@@ -9,11 +9,26 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
       throw new Error(ERROR_MSG.INVALID_URL);
     }
     const id = extractIdFromUrlPath(url) || '';
+    
     const handleGetRequest = async () => {
-      const getUser = await userCommand.get(id);
-      res.writeHead(STATUS.SUCCESS);
-      res.write(JSON.stringify(getUser));
-      res.end();
+      try {
+        const getUser = await userCommand.get(id);
+        res.writeHead(STATUS.SUCCESS);
+        res.write(JSON.stringify(getUser));
+        res.end();
+      } catch (error) {
+        let statusCode = STATUS.NOT_FOUND;
+        let errorMessage = ERROR_MSG.NOT_FOUND;
+        if (error instanceof Error) {
+          if (error.message === ERROR_MSG.INVALID_ID) {
+            statusCode = STATUS.INVALID;
+            errorMessage = error.message;
+          }
+        }
+        res.writeHead(statusCode);
+        res.write(errorMessage);
+        res.end();
+      }
     };
 
     const handlePostRequest = async () => {
