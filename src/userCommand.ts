@@ -12,11 +12,11 @@ export class UserCommand {
     } else {
       isValidUUID(id);
     }
-      const user = await database.getUser(id);
-      if (!user) {
-        throw new Error(ERROR_MSG.NOT_FOUND);
-      }
-      return user;
+    const user = await database.getUser(id);
+    if (!user) {
+      throw new Error(ERROR_MSG.NOT_FOUND);
+    }
+    return user;
   }
 
   async post(dataUser: User) {

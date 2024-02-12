@@ -10,9 +10,9 @@ export const enum STATUS {
 export const enum ERROR_MSG {
   SERVER_ERROR = 'Error on server',
   NOT_FOUND = 'User is not found',
-  INVALID_DATA = 'Invalid data',
-  INVALID_ID = 'Invalid id',
-  INVALID_URL = 'Invalid url',
+  INVALID_DATA = 'Invalid data, please check',
+  INVALID_ID = 'Invalid id, please check',
+  INVALID_URL = 'Invalid URL, please check',
 }
 
 export const API_BASE_URL = '/api/users';

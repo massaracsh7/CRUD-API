@@ -2,6 +2,7 @@ import cluster, { Worker } from 'cluster';
 import http from 'http';
 import os from 'os';
 import { router } from './router';
+import { shouldUseCluster } from './utils/isCluster';
 
 export const app = () => {
   const PORT = parseInt(process.env.PORT || '4000', 10) + (cluster.worker?.id || 0);
@@ -19,7 +20,6 @@ export const app = () => {
 
       cluster.on('exit', (worker, code, signal) => {
         console.log(`Worker ${worker.process.pid} died`);
-        console.log(`Forking new worker...`);
         cluster.fork();
       });
 
@@ -38,11 +38,6 @@ export const app = () => {
     server.listen(PORT, () => {
       console.log(`Server is running at http://localhost:${PORT}/`);
     });
-  }
-
-  function shouldUseCluster() {
-    const clusterEnabled = process.env.npm_lifecycle_script?.includes('cluster=enable');
-    return clusterEnabled;
   }
 
   return server;
