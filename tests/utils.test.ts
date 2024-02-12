@@ -1,3 +1,4 @@
+import { getIdFromUrl } from '../src/utils/getIdFromUrl';
 import { validateId } from '../src/utils/validateId';
 import { validateUser } from '../src/utils/validateUser';
 
@@ -36,5 +37,14 @@ describe('validateId should validate Id as uuid', () => {
   });
   it('should throw error', () => {
     expect(() => validateId(incorrectId)).toThrow('Invalid id, please check');
+  });
+});
+
+describe('getIdfromUrl should return correct Id', () => {
+  let correctId = '680b8c3a-9964-437a-bc75-e112c4213553';
+  let URL = 'http://localhost:4000/api/users/680b8c3a-9964-437a-bc75-e112c4213553';
+  it('should return correctId', () => {
+    const result = getIdFromUrl(URL);
+    expect(result).toBe(correctId);
   });
 });

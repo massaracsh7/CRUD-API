@@ -5,7 +5,7 @@ import { database } from '../src/dataUsers';
 const API_ENDPOINT = '/api/users';
 
 describe('API Errors Tests', () => {
-  
+ 
   const server = app();
   const request = supertest(server);
   let createdUserId = '';
