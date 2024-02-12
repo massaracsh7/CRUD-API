@@ -1,4 +1,5 @@
-import { ERROR_MSG, STATUS, MethodHandlers, Method } from './constants';
+import { ERROR_MSG, STATUS } from './constants';
+import { MethodHandlers, Method } from './types';
 import { IncomingMessage, ServerResponse } from 'http';
 import { userCommand } from './userCommand';
 import { getIdFromUrl } from './utils/getIdFromUrl';

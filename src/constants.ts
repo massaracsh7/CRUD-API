@@ -16,12 +16,3 @@ export const enum ERROR_MSG {
 }
 
 export const API_BASE_URL = '/api/users';
-
-export type MethodHandlers = {
-  GET: () => Promise<void>;
-  POST: () => Promise<void>;
-  PUT: () => Promise<void>;
-  DELETE: () => Promise<void>;
-};
-
-export type Method = keyof MethodHandlers;
