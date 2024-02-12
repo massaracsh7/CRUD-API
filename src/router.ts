@@ -1,6 +1,7 @@
 import { ERROR_MSG, STATUS, MethodHandlers, Method } from './constants';
 import { IncomingMessage, ServerResponse } from 'http';
 import { userCommand } from './userCommand';
+import { getIdFromUrl } from './utils/getIdFromUrl';
 
 export const router = async (req: IncomingMessage, res: ServerResponse) => {
   try {
@@ -8,8 +9,8 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
     if (!url || !url.startsWith('/api/users')) {
       throw new Error(ERROR_MSG.INVALID_URL);
     }
-    const id = extractIdFromUrlPath(url) || '';
-    
+    const id = getIdFromUrl(url) || '';
+
     const handleGetRequest = async () => {
       try {
         const getUser = await userCommand.get(id);
@@ -119,10 +120,4 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
     res.write(errorMessage);
     res.end();
   }
-};
-
-const extractIdFromUrlPath = (url: string) => {
-  const urlParts = url.split('/');
-  const idIndex = urlParts.indexOf('users') + 1;
-  return urlParts[idIndex];
 };

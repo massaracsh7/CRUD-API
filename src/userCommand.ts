@@ -2,6 +2,8 @@ import { User } from "./types";
 import { database } from './dataUsers';
 import { ERROR_MSG } from './constants';
 import crypto from 'crypto';
+import { validateUser } from "./utils/validateUser";
+import { isValidUUID } from "./utils/isValidUUID";
 
 export class UserCommand {
   async get(id?: string) {
@@ -45,21 +47,6 @@ export class UserCommand {
     }
     return database.delete(id);
   }
-}
-
-function validateUser(user: User) {
-  const { username, age, hobbies } = user;
-  if (!(username && typeof username === 'string' && age && typeof age === 'number' && Array.isArray(hobbies))) {
-    throw new Error(ERROR_MSG.INVALID_DATA);
-  }
-}
-
-function isValidUUID(id: string) {
-  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  if (!(uuidRegex.test(id))){
-    throw new Error(ERROR_MSG.INVALID_ID);
-  }
-
 }
 
 export const userCommand = new UserCommand();
