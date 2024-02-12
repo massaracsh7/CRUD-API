@@ -3,14 +3,14 @@ import { database } from './dataUsers';
 import { ERROR_MSG } from './constants';
 import crypto from 'crypto';
 import { validateUser } from "./utils/validateUser";
-import { isValidUUID } from "./utils/isValidUUID";
+import { validateId } from "./utils/validateId";
 
 export class UserCommand {
   async get(id?: string) {
     if (!id) {
       return database.getUsers();
     } else {
-      isValidUUID(id);
+      validateId(id);
     }
     const user = await database.getUser(id);
     if (!user) {
@@ -31,7 +31,7 @@ export class UserCommand {
 
   async put(id: string, updatedUser: User) {
     validateUser(updatedUser);
-    isValidUUID(id);
+    validateId(id);
     const user = await database.getUser(id);
     if (!user) {
       throw new Error(ERROR_MSG.NOT_FOUND);
@@ -40,7 +40,7 @@ export class UserCommand {
   }
 
   async delete(id: string) {
-    isValidUUID(id);
+    validateId(id);
     const user = await database.getUser(id);
     if (!user) {
       throw new Error(ERROR_MSG.NOT_FOUND);

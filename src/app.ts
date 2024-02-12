@@ -2,13 +2,13 @@ import cluster, { Worker } from 'cluster';
 import http from 'http';
 import os from 'os';
 import { router } from './router';
-import { shouldUseCluster } from './utils/isCluster';
+import { isCluster } from './utils/isCluster';
 
 export const app = () => {
   const PORT = parseInt(process.env.PORT || '4000', 10) + (cluster.worker?.id || 0);
   let server: http.Server;
 
-  if (shouldUseCluster() && cluster !== undefined) {
+  if (isCluster() && cluster !== undefined) {
     if (cluster.isPrimary) {
       const numWork = os.availableParallelism() - 1;
 
