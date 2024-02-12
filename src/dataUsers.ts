@@ -41,6 +41,9 @@ export class DataUsers {
     const deletedUser = this.database.splice(index, 1)[0]; // Remove user
     return deletedUser;
   }
+  public clear(): void {
+    this.database = [];
+  }
 }
 
 export const database = new DataUsers();
