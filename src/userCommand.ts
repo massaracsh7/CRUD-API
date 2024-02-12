@@ -8,11 +8,15 @@ export class UserCommand {
     if (!id) {
       return database.getUsers();
     } else {
-        const user = await database.getUser(id);
-        if (!user) {
-          throw new Error(ERROR_MSG.NOT_FOUND);
-        }
-        return user;
+      if (!isValidUUID(id)) {
+        throw new Error(ERROR_MSG.INVALID_ID);
+      }
+
+      const user = await database.getUser(id);
+      if (!user) {
+        throw new Error(ERROR_MSG.NOT_FOUND);
+      }
+      return user;
     }
   }
 
@@ -31,6 +35,10 @@ export class UserCommand {
       const user = await database.getUser(id);
       if (!user) {
         throw new Error(ERROR_MSG.NOT_FOUND);
+      } else {
+        if (!isValidUUID(id)) {
+          throw new Error(ERROR_MSG.INVALID_ID);
+        }
       }
     return database.put(id, updatedUser);
   }
@@ -39,6 +47,10 @@ export class UserCommand {
     const user = await database.getUser(id);
     if (!user) {
       throw new Error(ERROR_MSG.NOT_FOUND);
+    } else {
+      if (!isValidUUID(id)) {
+        throw new Error(ERROR_MSG.INVALID_ID);
+      }
     }
     return database.delete(id);
   }
@@ -49,6 +61,11 @@ function validateUser(user: User) {
   if (!(username && typeof username === 'string' && age && typeof age === 'number' && Array.isArray(hobbies))) {
     throw new Error(ERROR_MSG.INVALID_DATA);
   }
+}
+
+function isValidUUID(id: string): boolean {
+  const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  return uuidRegex.test(id);
 }
 
 export const userCommand = new UserCommand();

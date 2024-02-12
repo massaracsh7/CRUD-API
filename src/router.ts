@@ -35,13 +35,20 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
           res.write(JSON.stringify(resData));
           res.end();
         } catch (error) {
-          res.writeHead(STATUS.INVALID);
-          res.write(ERROR_MSG.INVALID_DATA);
+          let statusCode = STATUS.INVALID;
+          let errorMessage = ERROR_MSG.INVALID_DATA;
+          if (error instanceof Error) {
+            if (error.message === ERROR_MSG.INVALID_ID) {
+              statusCode = STATUS.INVALID;
+              errorMessage = error.message;
+            }
+          }
+          res.writeHead(statusCode);
+          res.write(errorMessage);
           res.end();
         }
       });
     };
-
 
     const handlePutRequest = async () => {
       let putData = '';
@@ -61,18 +68,39 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
           res.writeHead(STATUS.SUCCESS);
           res.end();
         } catch (error) {
-          res.writeHead(STATUS.INVALID);
-          res.write(ERROR_MSG.INVALID_DATA);
+          let statusCode = STATUS.INVALID;
+          let errorMessage = ERROR_MSG.INVALID_DATA;
+          if (error instanceof Error) {
+            if (error.message === ERROR_MSG.INVALID_ID) {
+              statusCode = STATUS.INVALID;
+              errorMessage = error.message;
+            }
+          }
+          res.writeHead(statusCode);
+          res.write(errorMessage);
           res.end();
         }
       });
     };
 
-
     const handleDeleteRequest = async () => {
-      await userCommand.delete(id);
-      res.writeHead(STATUS.DELETED);
-      res.end();
+      try {
+        await userCommand.delete(id);
+        res.writeHead(STATUS.DELETED);
+        res.end();
+      } catch (error) {
+        let statusCode = STATUS.INVALID;
+        let errorMessage = ERROR_MSG.INVALID_DATA;
+        if (error instanceof Error) {
+          if (error.message === ERROR_MSG.INVALID_ID) {
+            statusCode = STATUS.INVALID;
+            errorMessage = error.message;
+          }
+        }
+        res.writeHead(statusCode);
+        res.write(errorMessage);
+        res.end();
+      }
     };
 
     const methodHandlers: MethodHandlers = {
