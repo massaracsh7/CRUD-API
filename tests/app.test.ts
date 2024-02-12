@@ -1,14 +1,19 @@
 import { app } from '../src/app';
 import supertest from 'supertest';
-import { database } from '../src/dataUsers'; // Import the database for cleanup
+import { database } from '../src/dataUsers'; 
 
 const API_ENDPOINT = '/api/users';
 const server = app();
 const request = supertest(server);
 
 describe('API Endpoint Tests', () => {
-  // Initialize a variable to store the ID of the newly created user
+
   let createdUserId = '';
+
+  afterAll(async () => {
+    database.clear();
+    server.close();
+  });
 
   it('GET /api/users should return 200 and an empty array', async () => {
     const response = await request.get(API_ENDPOINT).set('Accept', 'aplication/json');
@@ -62,7 +67,6 @@ describe('API Endpoint Tests', () => {
   it('DELETE /api/users/{userId} deletes the user', async () => {
     const response = await request.delete(`${API_ENDPOINT}/${createdUserId}`).set('Accept', 'aplication/json');
     expect(response.status).toBe(204);
-
   });
 
   it('GET /api/users/{userId} should return 404, when user was deleted', async () => {

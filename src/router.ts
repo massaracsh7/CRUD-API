@@ -97,21 +97,8 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
     let statusCode = STATUS.ERROR;
     let errorMessage = ERROR_MSG.SERVER_ERROR;
     if (err instanceof Error) {
-      switch (err.message) {
-        case ERROR_MSG.INVALID_URL:
-          statusCode = STATUS.NOT_FOUND;
-          errorMessage = ERROR_MSG.INVALID_URL;
-          break;
-        case ERROR_MSG.INVALID_DATA:
-        case ERROR_MSG.INVALID_ID:
-          statusCode = STATUS.INVALID;
-          errorMessage = ERROR_MSG.INVALID_ID;
-          break;
-        case ERROR_MSG.NOT_FOUND:
-          statusCode = STATUS.NOT_FOUND;
-          errorMessage = ERROR_MSG.NOT_FOUND;
-          break;
-      }
+      statusCode = STATUS.NOT_FOUND;
+      errorMessage = ERROR_MSG.INVALID_URL;
     }
     res.writeHead(statusCode);
     res.write(errorMessage);
