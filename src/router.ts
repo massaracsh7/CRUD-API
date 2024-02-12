@@ -113,6 +113,7 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
     let statusCode = STATUS.ERROR;
     let errorMessage = ERROR_MSG.SERVER_ERROR;
     if (err instanceof Error) {
+      if (err.message === ERROR_MSG.INVALID_URL)
       statusCode = STATUS.NOT_FOUND;
       errorMessage = ERROR_MSG.INVALID_URL;
     }
