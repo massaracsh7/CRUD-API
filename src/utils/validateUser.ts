@@ -7,4 +7,5 @@ export const validateUser = (user: User) => {
   if (!(username && typeof username === 'string' && age && typeof age === 'number' && Array.isArray(hobbies))) {
     throw new Error(ERROR_MSG.INVALID_DATA);
   }
+  return true;
 }

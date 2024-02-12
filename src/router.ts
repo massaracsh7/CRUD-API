@@ -70,6 +70,9 @@ export const router = async (req: IncomingMessage, res: ServerResponse) => {
             if (error.message === ERROR_MSG.INVALID_ID) {
               statusCode = STATUS.INVALID;
               errorMessage = error.message;
+            } else if (error.message === ERROR_MSG.INVALID_DATA) {
+              statusCode = STATUS.INVALID;
+              errorMessage = error.message;
             }
           }
           res.writeHead(statusCode);

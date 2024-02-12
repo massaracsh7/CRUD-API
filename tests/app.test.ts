@@ -3,11 +3,11 @@ import supertest from 'supertest';
 import { database } from '../src/dataUsers'; 
 
 const API_ENDPOINT = '/api/users';
-const server = app();
-const request = supertest(server);
+
 
 describe('API Endpoint Tests', () => {
-
+  const server = app();
+  const request = supertest(server);
   let createdUserId = '';
 
   afterAll(async () => {

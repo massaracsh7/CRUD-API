@@ -30,8 +30,8 @@ export class UserCommand {
   }
 
   async put(id: string, updatedUser: User) {
-    validateUser(updatedUser);
     validateId(id);
+    validateUser(updatedUser);
     const user = await database.getUser(id);
     if (!user) {
       throw new Error(ERROR_MSG.NOT_FOUND);

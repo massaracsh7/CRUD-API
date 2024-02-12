@@ -5,4 +5,5 @@ export const validateId = (id: string) => {
   if (!(uuidRegex.test(id))) {
     throw new Error(ERROR_MSG.INVALID_ID);
   }
+  return true;
 }
