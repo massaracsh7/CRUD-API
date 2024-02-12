@@ -7,6 +7,8 @@
 
 * Install dependencies: $ npm install
 
+* Rename .env.example to .env
+
 ***************************
 
 ## Available scripts ##
