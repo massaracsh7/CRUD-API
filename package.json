@@ -1,0 +1,41 @@
+{
+  "name": "crud-api",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start:prod": "webpack --mode=production && node ./dist/index.js",
+    "start:dev": "nodemon ./src/index.ts",
+    "start:multi": "nodemon ./src/index.ts --cluster=enable",
+    "start:prod:multi": "webpack --mode=production && node ./dist/index.js --cluster=enable",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/massaracsh7/CRUD-API.git"
+  },
+  "dependencies": {
+    "dot-env": "^0.0.1",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/supertest": "^6.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "axios": "^1.6.7",
+    "eslint": "^8.44.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-webpack-plugin": "^4.0.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.3",
+    "supertest": "^6.3.4",
+    "ts-jest": "^29.1.2",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-shell-plugin-next": "^2.3.1"
+  }
+}
